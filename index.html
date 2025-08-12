@@ -45,6 +45,10 @@
             box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
             color: white;
         }
+        
+        .gap-3 {
+            gap: 1rem !important;
+        }
     </style>
 </head>
 <body>
@@ -56,8 +60,11 @@
                     Spotify Playlist Generator
                 </h1>
                 <p class="lead">Create amazing mixed playlists from Spotify using intelligent search and PlaylistRankings API</p>
-                <a href="https://github.com/EmilOmadsen/yessir" class="btn btn-spotify btn-lg">
+                <a href="https://github.com/EmilOmadsen/yessir" class="btn btn-spotify btn-lg me-3">
                     <i class="fab fa-github me-2"></i>View on GitHub
+                </a>
+                <a href="https://github.com/EmilOmadsen/yessir#readme" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-book me-2"></i>Read Documentation
                 </a>
             </div>
 
@@ -115,9 +122,20 @@
             <div class="text-center mt-5">
                 <h3>Ready to create amazing playlists?</h3>
                 <p class="text-muted">Get started with the Spotify Playlist Generator today!</p>
-                <a href="https://github.com/EmilOmadsen/yessir" class="btn btn-spotify">
-                    <i class="fab fa-github me-2"></i>Get Started
-                </a>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="https://github.com/EmilOmadsen/yessir" class="btn btn-spotify">
+                        <i class="fab fa-github me-2"></i>Clone Repository
+                    </a>
+                    <a href="https://github.com/EmilOmadsen/yessir#setup-instructions" class="btn btn-outline-success">
+                        <i class="fas fa-cog me-2"></i>Setup Guide
+                    </a>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        This is a local application - clone the repo and run it on your computer
+                    </small>
+                </div>
             </div>
         </div>
     </div>

@@ -18,6 +18,11 @@ import requests
 load_dotenv('.env')
 
 # For Railway deployment, also check for direct environment variables
+print("🔍 Checking environment variables...")
+print(f"🔍 SPOTIFY_CLIENT_ID: {os.getenv('SPOTIFY_CLIENT_ID', 'NOT FOUND')}")
+print(f"🔍 SPOTIFY_CLIENT_SECRET: {os.getenv('SPOTIFY_CLIENT_SECRET', 'NOT FOUND')}")
+print(f"🔍 REDIRECT_URI: {os.getenv('REDIRECT_URI', 'NOT FOUND')}")
+
 if not os.getenv('SPOTIFY_CLIENT_ID'):
     print("⚠️  SPOTIFY_CLIENT_ID not found in environment")
 if not os.getenv('SPOTIFY_CLIENT_SECRET'):

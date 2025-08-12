@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Spotify Playlist Generator - Create Mixed Playlists</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+        }
+        
+        .search-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .playlist-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        
+        .playlist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .playlist-card.selected {
+            border-color: #1DB954;
+            background: #f0fff4;
+        }
+        
+        .playlist-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .btn-spotify {
+            background: #1DB954;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-spotify:hover {
+            background: #1ed760;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .selected-playlists {
+            background: #e8f5e8;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .settings-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #1DB954;
+            box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        }
+        
+        .playlist-name-input {
+            background-color: white !important;
+            color: #333 !important;
+            cursor: text !important;
+        }
+        
+        .playlist-name-input:focus {
+            background-color: white !important;
+            border-color: #1DB954 !important;
+            box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25) !important;
+        }
+        
+        .playlist-name-input:hover {
+            border-color: #1DB954 !important;
+        }
+        
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.8rem;
+        }
+        
+        .recommendations-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #1DB954;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .recommendation-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .recommendation-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .recommendation-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header text-center">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a href="/dashboard" class="btn back-btn">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <h1 class="mb-0"><i class="fab fa-spotify me-3"></i>Playlist Generator</h1>
+                    <a href="/logout" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </a>
+                </div>
+                <p class="mb-0">Search for playlists and create amazing mixed playlists!</p>
+            </div>
+            
+            <div class="p-4">
+
+                
+                <!-- Search Section -->
+                <div class="search-section">
+                    <h3><i class="fas fa-search me-2"></i>Search for Playlists</h3>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="search-container">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Enter search terms (e.g., 'workout', 'chill', 'party')">
+                                <!-- Recommendations Dropdown -->
+                                <div id="recommendationsDropdown" class="recommendations-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button id="searchBtn" class="btn btn-spotify w-100">
+                                <span class="btn-text"><i class="fas fa-search me-2"></i>Search</span>
+                                <span class="loading">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>Searching...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search Results -->
+                <div id="searchResults" class="row" style="display: none;">
+                    <div class="col-12">
+                        <h4><i class="fas fa-list me-2"></i>Search Results</h4>
+                        <div id="playlistsContainer" class="row g-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Selected Playlists -->
+                <div id="selectedPlaylists" class="selected-playlists" style="display: none;">
+                    <h4><i class="fas fa-check-circle me-2"></i>Selected Playlists (<span id="selectedCount">0</span>)</h4>
+                    <div id="selectedContainer" class="row g-2"></div>
+                    <button id="clearSelection" class="btn btn-outline-danger btn-sm mt-2">
+                        <i class="fas fa-trash me-1"></i>Clear Selection
+                    </button>
+                </div>
+                
+                <!-- Generation Settings -->
+                <div id="generationSettings" class="settings-section" style="display: none;">
+                    <h3><i class="fas fa-cog me-2"></i>Generation Settings</h3>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="playlistDescription" class="form-label">Playlist Description (Optional)</label>
+                            <input type="text" id="playlistDescription" class="form-control" placeholder="Describe your mixed playlist">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Playlists</label>
+                            <input type="number" id="numPlaylists" class="form-control" value="3" min="1" max="10" onchange="updatePlaylistNameFields()">
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Playlist Names -->
+                    <div id="playlistNamesSection" class="mb-3">
+                        <label class="form-label">Playlist Names</label>
+                        <div id="playlistNameFields" class="row g-2">
+                            <!-- Dynamic playlist name fields will be generated here -->
+                        </div>
+                        <div class="form-text">Leave empty to auto-generate names based on your selected playlists</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="tracksPerPlaylist" class="form-label">Tracks per Playlist</label>
+                            <input type="number" id="tracksPerPlaylist" class="form-control" value="20" min="5" max="100">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="avoidDuplicates" class="form-label">Avoid Duplicates</label>
+                            <select id="avoidDuplicates" class="form-select">
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <button id="generateBtn" class="btn btn-spotify w-100">
+                                <span class="btn-text"><i class="fas fa-magic me-2"></i>Generate</span>
+                                <span class="loading">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>Generating...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results -->
+                <div id="results" style="display: none;">
+                    <h3><i class="fas fa-star me-2"></i>Generated Playlists</h3>
+                    <div id="resultsContainer"></div>
+                </div>
+                
+                <!-- Alert Messages -->
+                <div id="alertContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedPlaylists = [];
+        let recommendationTimeout;
+        
+        // Check for pre-selected playlists from dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedPlaylists = sessionStorage.getItem('selectedPlaylists');
+            if (storedPlaylists) {
+                try {
+                    selectedPlaylists = JSON.parse(storedPlaylists);
+                    updateSelectedPlaylists();
+                    updateGenerationSettings();
+                    
+                    // Show success message
+                    showAlert(`Loaded ${selectedPlaylists.length} playlists from dashboard!`, 'success');
+                    
+                    // Clear the stored playlists
+                    sessionStorage.removeItem('selectedPlaylists');
+                } catch (error) {
+                    console.error('Error loading stored playlists:', error);
+                }
+            }
+            
+            // Initialize playlist name fields
+            updatePlaylistNameFields();
+        });
+        
+        function updatePlaylistNameFields() {
+            const numPlaylists = parseInt(document.getElementById('numPlaylists').value) || 3;
+            const container = document.getElementById('playlistNameFields');
+            container.innerHTML = '';
+            
+            // Generate suggested names based on selected playlists
+            const suggestedNames = generateSuggestedNames(numPlaylists);
+            
+            for (let i = 0; i < numPlaylists; i++) {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+                col.innerHTML = `
+                    <div class="mb-2">
+                        <label class="form-label">Playlist ${i + 1} Name</label>
+                        <input type="text" class="form-control playlist-name-input" 
+                               id="playlistName${i}" 
+                               value=""
+                               placeholder="${suggestedNames[i] || `Enter name for playlist ${i + 1}`}">
+                    </div>
+                `;
+                container.appendChild(col);
+                
+                // Ensure the input field is editable
+                const input = document.getElementById(`playlistName${i}`);
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+                input.style.backgroundColor = 'white';
+                input.style.color = '#333';
+                input.style.cursor = 'text';
+            }
+        }
+        
+        function generateSuggestedNames(count) {
+            if (selectedPlaylists.length === 0) {
+                return [];
+            }
+            
+            const suggestions = [];
+            const playlistNames = selectedPlaylists.map(p => p.name).slice(0, 3);
+            
+            if (playlistNames.length === 1) {
+                for (let i = 0; i < count; i++) {
+                    suggestions.push(`${playlistNames[0]} Mix ${i + 1}`);
+                }
+            } else if (playlistNames.length === 2) {
+                for (let i = 0; i < count; i++) {
+                    suggestions.push(`${playlistNames[0]} + ${playlistNames[1]} Mix ${i + 1}`);
+                }
+            } else {
+                for (let i = 0; i < count; i++) {
+                    suggestions.push(`Mixed from ${playlistNames.length} Playlists ${i + 1}`);
+                }
+            }
+            
+            return suggestions;
+        }
+        
+        // Helper function to format follower count
+        function formatFollowers(count) {
+            if (count >= 1000000) {
+                return (count / 1000000).toFixed(1) + 'M';
+            } else if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            }
+            return count.toString();
+        }
+        
+        // Search functionality
+        document.getElementById('searchBtn').addEventListener('click', searchPlaylists);
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPlaylists();
+            }
+        });
+        
+        // Search input with recommendations
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            clearTimeout(recommendationTimeout);
+            
+            if (query.length >= 2) {
+                recommendationTimeout = setTimeout(() => {
+                    getRecommendations(query);
+                }, 300);
+            } else {
+                hideRecommendations();
+            }
+        });
+        
+        // Hide recommendations when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#searchInput') && !e.target.closest('#recommendationsDropdown')) {
+                hideRecommendations();
+            }
+        });
+        
+        // Generate functionality
+        document.getElementById('generateBtn').addEventListener('click', generatePlaylists);
+        
+        // Clear selection
+        document.getElementById('clearSelection').addEventListener('click', function() {
+            selectedPlaylists = [];
+            updateSelectedPlaylists();
+            updateGenerationSettings();
+        });
+        
+        // Recommendation Functions
+        async function getRecommendations(query) {
+            try {
+                const response = await fetch('/recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.playlists.length > 0) {
+                    displayRecommendations(data.playlists);
+                } else {
+                    hideRecommendations();
+                }
+            } catch (error) {
+                hideRecommendations();
+            }
+        }
+        
+        function displayRecommendations(playlists) {
+            const dropdown = document.getElementById('recommendationsDropdown');
+            dropdown.innerHTML = '';
+            
+            playlists.forEach(playlist => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                item.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${playlist.image || 'https://via.placeholder.com/40x40?text=No+Image'}" 
+                             class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${playlist.name}</div>
+                            <small class="text-muted">${playlist.creator} • ${playlist.tracks} tracks</small>
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    document.getElementById('searchInput').value = playlist.name;
+                    hideRecommendations();
+                    searchPlaylists();
+                });
+                
+                dropdown.appendChild(item);
+            });
+            
+            dropdown.style.display = 'block';
+        }
+        
+        function hideRecommendations() {
+            document.getElementById('recommendationsDropdown').style.display = 'none';
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        function setLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            const btnText = button.querySelector('.btn-text');
+            const loadingSpan = button.querySelector('.loading');
+            
+            if (loading) {
+                btnText.style.display = 'none';
+                loadingSpan.classList.add('show');
+                button.disabled = true;
+            } else {
+                btnText.style.display = 'inline';
+                loadingSpan.classList.remove('show');
+                button.disabled = false;
+            }
+        }
+        
+        async function searchPlaylists() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showAlert('Please enter a search term', 'warning');
+                return;
+            }
+            
+            setLoading('searchBtn', true);
+            
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySearchResults(data.playlists);
+                    showAlert(`Found ${data.playlists.length} playlists`, 'success');
+                } else {
+                    showAlert(data.error || 'Search failed', 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                setLoading('searchBtn', false);
+            }
+        }
+        
+        function displaySearchResults(playlists) {
+            const container = document.getElementById('playlistsContainer');
+            const resultsDiv = document.getElementById('searchResults');
+            
+            container.innerHTML = '';
+            
+            playlists.forEach((playlist, index) => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                card.innerHTML = `
+                    <div class="playlist-card" data-playlist='${JSON.stringify(playlist)}'>
+                        <img src="${playlist.image || 'https://via.placeholder.com/300x150?text=No+Image'}" 
+                             class="playlist-image" alt="${playlist.name}">
+                        <div class="p-3">
+                            <h6 class="mb-1">${playlist.name}</h6>
+                            <p class="text-muted mb-2">by ${playlist.creator}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-1">${playlist.tracks} tracks</span>
+                                <span class="badge ${playlist.public ? 'bg-success' : 'bg-warning'} me-1">
+                                    ${playlist.public ? 'Public' : 'Private'}
+                                </span>
+                                ${playlist.followers ? `<span class="badge bg-info me-1">${formatFollowers(playlist.followers)} followers</span>` : ''}
+        
+                            </div>
+                            ${playlist.keywords && playlist.keywords.length > 0 ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">Keywords: ${playlist.keywords.slice(0, 3).map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('')}</small>
+                                </div>
+                            ` : ''}
+                            ${playlist.description ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">${playlist.description.substring(0, 100)}${playlist.description.length > 100 ? '...' : ''}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                card.querySelector('.playlist-card').addEventListener('click', function() {
+                    togglePlaylistSelection(playlist, this);
+                });
+                
+                container.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+        }
+        
+        function togglePlaylistSelection(playlist, element) {
+            const index = selectedPlaylists.findIndex(p => p.id === playlist.id);
+            
+            if (index === -1) {
+                selectedPlaylists.push(playlist);
+                element.classList.add('selected');
+            } else {
+                selectedPlaylists.splice(index, 1);
+                element.classList.remove('selected');
+            }
+            
+            updateSelectedPlaylists();
+            updateGenerationSettings();
+        }
+        
+        function updateSelectedPlaylists() {
+            const container = document.getElementById('selectedContainer');
+            const countSpan = document.getElementById('selectedCount');
+            const selectedDiv = document.getElementById('selectedPlaylists');
+            
+            countSpan.textContent = selectedPlaylists.length;
+            
+            if (selectedPlaylists.length === 0) {
+                selectedDiv.style.display = 'none';
+                return;
+            }
+            
+            selectedDiv.style.display = 'block';
+            container.innerHTML = '';
+            
+            selectedPlaylists.forEach(playlist => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                card.innerHTML = `
+                    <div class="result-card">
+                        <div class="d-flex align-items-center">
+                            <img src="${playlist.image || 'https://via.placeholder.com/60x60?text=No+Image'}" 
+                                 class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${playlist.name}</h6>
+                                <p class="text-muted mb-0">${playlist.creator} • ${playlist.tracks} tracks</p>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" onclick="removePlaylist('${playlist.id}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function removePlaylist(playlistId) {
+            selectedPlaylists = selectedPlaylists.filter(p => p.id !== playlistId);
+            updateSelectedPlaylists();
+            updateGenerationSettings();
+            
+            // Update search results selection
+            document.querySelectorAll('.playlist-card').forEach(card => {
+                const playlist = JSON.parse(card.dataset.playlist);
+                if (playlist.id === playlistId) {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+        
+        function updateGenerationSettings() {
+            const settingsDiv = document.getElementById('generationSettings');
+            if (selectedPlaylists.length > 0) {
+                settingsDiv.style.display = 'block';
+                updatePlaylistNameFields(); // Update suggestions when playlists change
+            } else {
+                settingsDiv.style.display = 'none';
+            }
+        }
+        
+        async function generatePlaylists() {
+            if (selectedPlaylists.length === 0) {
+                showAlert('Please select at least one playlist', 'warning');
+                return;
+            }
+            
+            setLoading('generateBtn', true);
+            
+            // Collect individual playlist names
+            const playlistNames = [];
+            const numPlaylists = parseInt(document.getElementById('numPlaylists').value);
+            for (let i = 0; i < numPlaylists; i++) {
+                const nameInput = document.getElementById(`playlistName${i}`);
+                if (nameInput) {
+                    playlistNames.push(nameInput.value.trim());
+                }
+            }
+            
+            const data = {
+                playlists: selectedPlaylists,
+                num_playlists: numPlaylists,
+                tracks_per_playlist: parseInt(document.getElementById('tracksPerPlaylist').value),
+                avoid_duplicates: document.getElementById('avoidDuplicates').value === 'true',
+                playlist_names: playlistNames,
+                playlist_description: document.getElementById('playlistDescription').value.trim()
+            };
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayResults(result.playlists);
+                    showAlert(`Successfully created ${result.playlists.length} playlists!`, 'success');
+                } else {
+                    if (response.status === 401) {
+                        showAlert('Please login to your Spotify account first. Click the login button above.', 'warning');
+                    } else {
+                        showAlert(result.error || 'Generation failed', 'danger');
+                    }
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                setLoading('generateBtn', false);
+            }
+        }
+        
+        function displayResults(playlists) {
+            const container = document.getElementById('resultsContainer');
+            const resultsDiv = document.getElementById('results');
+            
+            container.innerHTML = '';
+            
+            playlists.forEach(playlist => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                card.innerHTML = `
+                    <div class="result-card">
+                        <div class="text-center">
+                            <img src="${playlist.image || 'https://via.placeholder.com/200x200?text=New+Playlist'}" 
+                                 class="rounded mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                            <h5 class="mb-2">${playlist.name}</h5>
+                            <p class="text-muted mb-3">${playlist.tracks} tracks</p>
+                            <a href="${playlist.url}" target="_blank" class="btn btn-spotify">
+                                <i class="fab fa-spotify me-2"></i>Open in Spotify
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

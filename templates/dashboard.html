@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Spotify Playlist Generator - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 1rem 2rem;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: #1DB954;
+            color: white;
+        }
+        
+        .search-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .playlist-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        
+        .playlist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .playlist-card.selected {
+            border-color: #1DB954;
+            background: #f0fff4;
+        }
+        
+        .playlist-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .btn-spotify {
+            background: #1DB954;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-spotify:hover {
+            background: #1ed760;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .selected-playlists {
+            background: #e8f5e8;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .settings-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #1DB954;
+            box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        }
+        
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.8rem;
+        }
+        
+        .genre-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .genre-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+        
+        .stats-card {
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .position-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .position-badge.bg-warning {
+            background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+        }
+        
+        .position-badge.bg-success {
+            background: linear-gradient(45deg, #28a745, #20c997) !important;
+        }
+        
+        .position-badge.bg-info {
+            background: linear-gradient(45deg, #17a2b8, #6f42c1) !important;
+        }
+        
+        .position-badge.bg-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057) !important;
+        }
+        
+        .playlist-card {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header text-center">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div></div> <!-- Spacer -->
+                    <h1 class="mb-0"><i class="fab fa-spotify me-3"></i>Spotify Playlist Generator</h1>
+                    <a href="/logout" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </a>
+                </div>
+                <p class="mb-0">Discover and create amazing mixed playlists!</p>
+                
+                <!-- Navigation -->
+                <nav class="mt-4">
+                    <ul class="nav nav-tabs justify-content-center" id="mainTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                                <i class="fas fa-home me-2"></i>Dashboard
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="keywords-tab" data-bs-toggle="tab" data-bs-target="#keywords" type="button" role="tab">
+                                <i class="fas fa-key me-2"></i>Top Keywords by Country
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="generator-tab" data-bs-toggle="tab" data-bs-target="#generator" type="button" role="tab">
+                                <i class="fas fa-magic me-2"></i>Playlist Generator
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="p-4">
+                <!-- Tab Content -->
+                <div class="tab-content" id="mainTabsContent">
+                    <!-- Dashboard Tab -->
+                    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+
+                        
+                        <!-- Combined Search Section -->
+                        <div class="search-section">
+                            <h3><i class="fas fa-search me-2"></i>Find Popular Playlists by Keyword & Country</h3>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" id="keywordInput" class="form-control" placeholder="Enter keyword (e.g., 'funk', 'rock', 'chill')">
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="countrySelect" class="form-select">
+                                        <option value="">Select a country...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button id="combinedSearchBtn" class="btn btn-spotify w-100">
+                                        <span class="btn-text"><i class="fas fa-search me-2"></i>Find Playlists</span>
+                                        <span class="loading">
+                                            <span class="spinner-border spinner-border-sm me-2"></span>Searching...
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        
+                        <!-- Search Results -->
+                        <div id="searchResults" style="display: none;">
+                            <h4><i class="fas fa-list me-2"></i>Search Results</h4>
+                            <div id="searchResultsContainer" class="row g-3">
+                                <!-- Results will be populated here -->
+                            </div>
+                        </div>
+                        
+
+                        
+
+                        
+                        <!-- Genre Search Results -->
+                        <div id="genreResults" class="row" style="display: none;">
+                            <div class="col-12">
+                                <h4><i class="fas fa-fire me-2"></i>Popular <span id="genreName"></span> Playlists</h4>
+                                <div id="genrePlaylistsContainer" class="row g-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Keywords Tab -->
+                    <div class="tab-pane fade" id="keywords" role="tabpanel">
+                        <div class="search-section">
+                            <h3><i class="fas fa-key me-2"></i>Top Keywords by Country</h3>
+                            <p class="text-muted">Discover the most popular music keywords and their top-ranked playlists in each country</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <select id="keywordsCountrySelect" class="form-select">
+                                        <option value="">Select a country to view top keywords...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <button id="loadKeywordsBtn" class="btn btn-spotify w-100">
+                                        <span class="btn-text"><i class="fas fa-search me-2"></i>Load Top Keywords</span>
+                                        <span class="loading">
+                                            <span class="spinner-border spinner-border-sm me-2"></span>Loading...
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Keywords Results -->
+                        <div id="keywordsResults" style="display: none;">
+                            <h4><i class="fas fa-list me-2"></i>Top Keywords for <span id="selectedCountryName"></span></h4>
+                            <div id="keywordsContainer" class="row g-3">
+                                <!-- Keywords will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- All Countries Keywords Overview -->
+                        <div id="allCountriesKeywords">
+                            <h4><i class="fas fa-globe me-2"></i>Global Keywords Overview</h4>
+                            <p class="text-muted">Click on any country to see its top keywords and playlists</p>
+                            <div id="allCountriesContainer" class="row g-3">
+                                <!-- All countries will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Generator Tab -->
+                    <div class="tab-pane fade" id="generator" role="tabpanel">
+                        <div class="text-center">
+                            <h3><i class="fas fa-magic me-2"></i>Playlist Generator</h3>
+                            <p class="text-muted">Create mixed playlists from your selected playlists</p>
+                            <a href="/generator" class="btn btn-spotify btn-lg">
+                                <i class="fas fa-external-link-alt me-2"></i>Open Generator
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alert Messages -->
+                <div id="alertContainer"></div>
+                
+                <!-- Go to Generator Button -->
+                <div id="goToGeneratorSection" class="text-center mt-4" style="display: none;">
+                    <div class="alert alert-info">
+                        <h5>🎵 Selected Playlists Ready!</h5>
+                        <p class="mb-3">You have selected <span id="selectedCount">0</span> playlists. Ready to create your mixed playlist?</p>
+                        <button id="goToGeneratorBtn" class="btn btn-success btn-lg">
+                            <i class="fas fa-magic me-2"></i>Go to Generator
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedPlaylists = [];
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCountries();
+            loadFeaturedPlaylists();
+            
+            // Combined search functionality
+            document.getElementById('combinedSearchBtn').addEventListener('click', function() {
+                const keyword = document.getElementById('keywordInput').value.trim();
+                const country = document.getElementById('countrySelect').value;
+                
+                if (keyword && country) {
+                    searchCombined(keyword, country);
+                } else if (keyword) {
+                    searchKeywordOnly(keyword);
+                } else if (country) {
+                    searchCountryOnly(country);
+                } else {
+                    showAlert('Please enter a keyword and/or select a country', 'warning');
+                }
+            });
+            
+            // Enter key support for keyword input
+            document.getElementById('keywordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('combinedSearchBtn').click();
+                }
+            });
+            
+            // Keywords tab functionality
+            document.getElementById('loadKeywordsBtn').addEventListener('click', function() {
+                const country = document.getElementById('keywordsCountrySelect').value;
+                if (country) {
+                    loadKeywordsForCountry(country);
+                } else {
+                    showAlert('Please select a country', 'warning');
+                }
+            });
+            
+            // Load countries for keywords tab
+            loadCountriesForKeywords();
+            loadAllCountriesKeywords();
+            
+            // Add event listener for Go to Generator button
+            document.getElementById('goToGeneratorBtn').addEventListener('click', goToGenerator);
+        });
+        
+        // Helper function to format follower count
+        function formatFollowers(count) {
+            if (count >= 1000000) {
+                return (count / 1000000).toFixed(1) + 'M';
+            } else if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            }
+            return count.toString();
+        }
+        
+        // Dashboard Functions
+        
+        async function loadFeaturedPlaylists() {
+            try {
+                const response = await fetch('/featured', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayFeaturedPlaylists(data.playlists);
+                } else {
+                    console.error('Error loading featured playlists:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading featured playlists:', error);
+            }
+        }
+        
+        function displayFeaturedPlaylists(playlists) {
+            const container = document.getElementById('featuredContainer');
+            container.innerHTML = '';
+            
+            playlists.forEach(playlist => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                card.innerHTML = `
+                    <div class="playlist-card" data-playlist='${JSON.stringify(playlist)}'>
+                        <img src="${playlist.image || 'https://via.placeholder.com/300x150?text=Featured'}" 
+                             class="playlist-image" alt="${playlist.name}">
+                        <div class="p-3">
+                            <h6 class="mb-1">${playlist.name}</h6>
+                            <p class="text-muted mb-2">by ${playlist.creator}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-1">${playlist.tracks} tracks</span>
+                                <span class="badge bg-warning me-1">Featured</span>
+                                ${playlist.followers ? `<span class="badge bg-info me-1">${formatFollowers(playlist.followers)} followers</span>` : ''}
+                            </div>
+                            ${playlist.keywords && playlist.keywords.length > 0 ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">Keywords: ${playlist.keywords.slice(0, 3).map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('')}</small>
+                                </div>
+                            ` : ''}
+                            ${playlist.description ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">${playlist.description.substring(0, 100)}${playlist.description.length > 100 ? '...' : ''}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                card.querySelector('.playlist-card').addEventListener('click', function() {
+                    togglePlaylistSelection(playlist, this);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+        
+        async function loadCountries() {
+            try {
+                const response = await fetch('/rankings/countries', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.countries) {
+                    populateCountrySelect(data.countries);
+                } else {
+                    console.error('Error loading countries:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading countries:', error);
+            }
+        }
+        
+        function populateCountrySelect(countries) {
+            const select = document.getElementById('countrySelect');
+            
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = country.name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function searchCountryRankings(countryCode = null) {
+            const country = countryCode || document.getElementById('countrySelect').value;
+            
+            if (!country) {
+                showAlert('Please select a country', 'warning');
+                return;
+            }
+            
+            setLoading('countrySearchBtn', true);
+            
+            try {
+                const response = await fetch(`/rankings/country/${country}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayCountryResults(data.rankings, country);
+                    showAlert(`Found ${data.rankings.length} top playlists for ${country}`, 'success');
+                } else {
+                    showAlert(data.error || 'Search failed', 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                setLoading('countrySearchBtn', false);
+            }
+        }
+        
+        function displayCountryResults(rankings, countryCode) {
+            const container = document.getElementById('genrePlaylistsContainer');
+            const resultsDiv = document.getElementById('genreResults');
+            const genreNameSpan = document.getElementById('genreName');
+            
+            // Get country name
+            const countryName = document.getElementById('countrySelect').options[
+                document.getElementById('countrySelect').selectedIndex
+            ]?.text || countryCode;
+            
+            genreNameSpan.textContent = countryName;
+            container.innerHTML = '';
+            
+            if (rankings.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No rankings found for ${countryName}. Try another country or check back later.</p>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+                return;
+            }
+            
+            rankings.forEach(ranking => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                card.innerHTML = `
+                    <div class="playlist-card" data-playlist='${JSON.stringify(ranking)}'>
+                        <img src="${ranking.image || 'https://via.placeholder.com/300x150?text=Top+'+ranking.position}" 
+                             class="playlist-image" alt="${ranking.name}">
+                        <div class="p-3">
+                            <h6 class="mb-1">${ranking.name}</h6>
+                            <p class="text-muted mb-2">by ${ranking.creator || 'Unknown'}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-success me-1">#${ranking.position}</span>
+                                <span class="badge bg-info me-1">${ranking.country}</span>
+                                <span class="badge bg-secondary me-1">${ranking.tracks || 0} tracks</span>
+                                ${ranking.followers ? `<span class="badge bg-warning me-1">${formatFollowers(ranking.followers)} followers</span>` : ''}
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Keyword: <span class="badge bg-light text-dark">${ranking.keyword}</span></small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                card.querySelector('.playlist-card').addEventListener('click', function() {
+                    togglePlaylistSelection(ranking, this);
+                });
+                
+                container.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        async function searchGenrePlaylists() {
+            const genre = document.getElementById('genreInput').value.trim();
+            if (!genre) {
+                showAlert('Please enter a genre', 'warning');
+                return;
+            }
+            
+            setLoading('genreSearchBtn', true);
+            
+            try {
+                const response = await fetch('/popular', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ genre: genre })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayGenreResults(data.playlists, genre);
+                    showAlert(`Found ${data.playlists.length} popular ${genre} playlists`, 'success');
+                } else {
+                    showAlert(data.error || 'Search failed', 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                setLoading('genreSearchBtn', false);
+            }
+        }
+        
+
+        
+        function displayGenreResults(playlists, genre) {
+            const container = document.getElementById('genrePlaylistsContainer');
+            const resultsDiv = document.getElementById('genreResults');
+            const genreNameSpan = document.getElementById('genreName');
+            
+            genreNameSpan.textContent = genre.charAt(0).toUpperCase() + genre.slice(1);
+            container.innerHTML = '';
+            
+            // Filter out playlists with 0 followers, keep original order
+            playlists = playlists.filter(playlist => (playlist.followers || 0) > 0);
+            playlists = playlists.slice(0, 20);
+            
+            playlists.forEach((playlist, index) => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                // Determine ranking badge color based on followers
+                const followers = playlist.followers || 0;
+                let rankingBadgeClass = 'bg-secondary';
+                if (followers >= 1000000) {
+                    rankingBadgeClass = 'bg-warning'; // Gold for 1M+ followers
+                } else if (followers >= 100000) {
+                    rankingBadgeClass = 'bg-success'; // Green for 100K+ followers
+                } else if (followers >= 10000) {
+                    rankingBadgeClass = 'bg-info'; // Blue for 10K+ followers
+                } else if (followers >= 1000) {
+                    rankingBadgeClass = 'bg-primary'; // Purple for 1K+ followers
+                }
+                
+                card.innerHTML = `
+                    <div class="playlist-card" data-playlist='${JSON.stringify(playlist)}'>
+                        <div class="position-badge ${rankingBadgeClass}">
+                            <span class="position-number">#${index + 1}</span>
+                        </div>
+                        <img src="${playlist.image || 'https://via.placeholder.com/300x150?text=No+Image'}" 
+                             class="playlist-image" alt="${playlist.name}">
+                        <div class="p-3">
+                            <h6 class="mb-1">${playlist.name}</h6>
+                            <p class="text-muted mb-2">by ${playlist.creator}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-1">${playlist.tracks} tracks</span>
+                                ${playlist.followers ? `<span class="badge bg-info me-1">${formatFollowers(playlist.followers)} followers</span>` : ''}
+
+                            </div>
+                            ${playlist.keywords && playlist.keywords.length > 0 ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">Keywords: ${playlist.keywords.slice(0, 3).map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('')}</small>
+                                </div>
+                            ` : ''}
+                            ${playlist.description ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">${playlist.description.substring(0, 100)}${playlist.description.length > 100 ? '...' : ''}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                card.querySelector('.playlist-card').addEventListener('click', function() {
+                    togglePlaylistSelection(playlist, this);
+                });
+                
+                container.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function togglePlaylistSelection(playlist, element) {
+            const index = selectedPlaylists.findIndex(p => p.id === playlist.id);
+            
+            if (index === -1) {
+                selectedPlaylists.push(playlist);
+                element.classList.add('selected');
+            } else {
+                selectedPlaylists.splice(index, 1);
+                element.classList.remove('selected');
+            }
+            
+            updateGoToGeneratorButton();
+            showAlert(`Selected ${selectedPlaylists.length} playlists. Go to Generator to create mixed playlists!`, 'info');
+        }
+        
+        function updateGoToGeneratorButton() {
+            const section = document.getElementById('goToGeneratorSection');
+            const countSpan = document.getElementById('selectedCount');
+            
+            countSpan.textContent = selectedPlaylists.length;
+            
+            if (selectedPlaylists.length > 0) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+        
+        function goToGenerator() {
+            // Store selected playlists in sessionStorage
+            sessionStorage.setItem('selectedPlaylists', JSON.stringify(selectedPlaylists));
+            
+            // Navigate to generator page
+            window.location.href = '/generator';
+        }
+        
+        function setLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            const btnText = button.querySelector('.btn-text');
+            const loadingSpan = button.querySelector('.loading');
+            
+            if (loading) {
+                btnText.style.display = 'none';
+                loadingSpan.classList.add('show');
+                button.disabled = true;
+            } else {
+                btnText.style.display = 'inline';
+                loadingSpan.classList.remove('show');
+                button.disabled = false;
+            }
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        // New Combined Search Functions
+        async function searchCombined(keyword, country) {
+            setLoading('combinedSearchBtn', true);
+            
+            try {
+                // First, try to get rankings for the specific keyword from PlaylistRankings API
+                const keywordResponse = await fetch(`/rankings/keyword/${encodeURIComponent(keyword)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (keywordResponse.ok) {
+                    const keywordData = await keywordResponse.json();
+                    
+                    // Check if we have rankings for the specific country
+                    if (keywordData && keywordData[country]) {
+                        const countryRankings = keywordData[country];
+                        const formattedRankings = [];
+                        
+                        // Format the rankings for display
+                        for (const ranking of countryRankings) {
+                            if (ranking && ranking.playlist) {
+                                formattedRankings.push({
+                                    id: ranking.playlist.id,
+                                    name: ranking.playlist.name,
+                                    position: ranking.position,
+                                    country: country,
+                                    keyword: keyword,
+                                    creator: 'Loading...', // Will be filled by Spotify API
+                                    tracks: 0,
+                                    followers: 0,
+                                    image: null,
+                                    url: '',
+                                    description: '',
+                                    keywords: [keyword]
+                                });
+                            }
+                        }
+                        
+                        if (formattedRankings.length > 0) {
+                            displaySearchResults(formattedRankings, `"${keyword}" in ${country}`);
+                            return;
+                        }
+                    }
+                }
+                
+                // Fallback: search Spotify directly
+                await searchSpotifyCombined(keyword, country);
+                
+            } catch (error) {
+                console.error('Error in combined search:', error);
+                // Fallback: search Spotify directly
+                await searchSpotifyCombined(keyword, country);
+            } finally {
+                setLoading('combinedSearchBtn', false);
+            }
+        }
+        
+        async function searchKeywordOnly(keyword) {
+            setLoading('combinedSearchBtn', true);
+            
+            try {
+                const response = await fetch('/popular', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ genre: keyword })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySearchResults(data.playlists, `"${keyword}" playlists`);
+                } else {
+                    showAlert(data.error || 'Search failed', 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                setLoading('combinedSearchBtn', false);
+            }
+        }
+        
+        async function searchCountryOnly(country) {
+            setLoading('combinedSearchBtn', true);
+            
+            try {
+                const response = await fetch(`/rankings/country/${country}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySearchResults(data.rankings, `Top playlists in ${country}`);
+                } else {
+                    showAlert('Failed to load country rankings', 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'danger');
+            } finally {
+                setLoading('combinedSearchBtn', false);
+            }
+        }
+        
+        async function searchSpotifyCombined(keyword, country) {
+            try {
+                const countryNames = {
+                    'US': 'United States', 'GB': 'United Kingdom', 'DE': 'Germany', 'FR': 'France',
+                    'IT': 'Italy', 'ES': 'Spain', 'CA': 'Canada', 'AU': 'Australia', 'JP': 'Japan',
+                    'BR': 'Brazil', 'MX': 'Mexico', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
+                    'DK': 'Denmark', 'FI': 'Finland', 'CH': 'Switzerland', 'AT': 'Austria', 'BE': 'Belgium',
+                    'PT': 'Portugal', 'IE': 'Ireland', 'PL': 'Poland', 'CZ': 'Czech Republic', 'HU': 'Hungary',
+                    'RO': 'Romania', 'BG': 'Bulgaria', 'HR': 'Croatia', 'SI': 'Slovenia', 'SK': 'Slovakia',
+                    'LT': 'Lithuania', 'LV': 'Latvia', 'EE': 'Estonia', 'GR': 'Greece', 'CY': 'Cyprus',
+                    'MT': 'Malta', 'LU': 'Luxembourg', 'IS': 'Iceland', 'RU': 'Russia', 'UA': 'Ukraine',
+                    'BY': 'Belarus', 'MD': 'Moldova', 'GE': 'Georgia', 'AM': 'Armenia', 'AZ': 'Azerbaijan',
+                    'TR': 'Turkey', 'IL': 'Israel', 'SA': 'Saudi Arabia', 'AE': 'United Arab Emirates',
+                    'QA': 'Qatar', 'KW': 'Kuwait', 'BH': 'Bahrain', 'OM': 'Oman', 'JO': 'Jordan',
+                    'LB': 'Lebanon', 'SY': 'Syria', 'IQ': 'Iraq', 'IR': 'Iran', 'AF': 'Afghanistan',
+                    'PK': 'Pakistan', 'BD': 'Bangladesh', 'LK': 'Sri Lanka', 'NP': 'Nepal', 'BT': 'Bhutan',
+                    'MV': 'Maldives', 'MY': 'Malaysia', 'SG': 'Singapore', 'TH': 'Thailand', 'VN': 'Vietnam',
+                    'PH': 'Philippines', 'ID': 'Indonesia', 'MM': 'Myanmar', 'LA': 'Laos', 'KH': 'Cambodia',
+                    'BN': 'Brunei', 'TL': 'Timor-Leste', 'CN': 'China', 'TW': 'Taiwan', 'HK': 'Hong Kong',
+                    'MO': 'Macau', 'MN': 'Mongolia', 'KP': 'North Korea', 'NZ': 'New Zealand', 'FJ': 'Fiji',
+                    'PG': 'Papua New Guinea', 'SB': 'Solomon Islands', 'VU': 'Vanuatu', 'NC': 'New Caledonia',
+                    'PF': 'French Polynesia', 'AR': 'Argentina', 'CL': 'Chile', 'PE': 'Peru', 'CO': 'Colombia',
+                    'VE': 'Venezuela', 'EC': 'Ecuador', 'BO': 'Bolivia', 'PY': 'Paraguay', 'UY': 'Uruguay',
+                    'GY': 'Guyana', 'SR': 'Suriname', 'GF': 'French Guiana', 'FK': 'Falkland Islands',
+                    'ZA': 'South Africa', 'EG': 'Egypt', 'NG': 'Nigeria', 'KE': 'Kenya', 'GH': 'Ghana',
+                    'ET': 'Ethiopia', 'TZ': 'Tanzania', 'UG': 'Uganda', 'DZ': 'Algeria', 'MA': 'Morocco',
+                    'TN': 'Tunisia', 'LY': 'Libya', 'SD': 'Sudan', 'SS': 'South Sudan', 'CM': 'Cameroon',
+                    'CI': 'Ivory Coast', 'BF': 'Burkina Faso', 'ML': 'Mali', 'NE': 'Niger', 'TD': 'Chad',
+                    'CF': 'Central African Republic', 'CG': 'Republic of the Congo', 'CD': 'Democratic Republic of the Congo',
+                    'GA': 'Gabon', 'GQ': 'Equatorial Guinea', 'ST': 'São Tomé and Príncipe', 'AO': 'Angola',
+                    'ZM': 'Zambia', 'ZW': 'Zimbabwe', 'BW': 'Botswana', 'NA': 'Namibia', 'SZ': 'Eswatini',
+                    'LS': 'Lesotho', 'MG': 'Madagascar', 'MU': 'Mauritius', 'SC': 'Seychelles', 'KM': 'Comoros',
+                    'DJ': 'Djibouti', 'SO': 'Somalia', 'ER': 'Eritrea', 'RW': 'Rwanda', 'BI': 'Burundi',
+                    'MW': 'Malawi', 'MZ': 'Mozambique', 'RE': 'Réunion', 'YT': 'Mayotte', 'CV': 'Cape Verde',
+                    'GM': 'Gambia', 'GN': 'Guinea', 'GW': 'Guinea-Bissau', 'SL': 'Sierra Leone', 'LR': 'Liberia',
+                    'TG': 'Togo', 'BJ': 'Benin', 'SN': 'Senegal', 'MR': 'Mauritania', 'EH': 'Western Sahara',
+                    'SH': 'Saint Helena', 'AC': 'Ascension Island', 'TA': 'Tristan da Cunha'
+                };
+                
+                const countryName = countryNames[country] || country;
+                
+                // Use the new search endpoint that properly handles country filtering
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        query: keyword,
+                        country: country 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.playlists && data.playlists.length > 0) {
+                    // Add position data to playlists based on search order if not already present
+                    const playlistsWithPosition = data.playlists.map((playlist, index) => ({
+                        ...playlist,
+                        position: playlist.position || index + 1,
+                        country: playlist.country || country,
+                        keyword: playlist.keyword || keyword
+                    }));
+                    
+                    displaySearchResults(playlistsWithPosition, `"${keyword}" in ${countryName}`);
+                } else {
+                    showAlert('No playlists found for this combination', 'warning');
+                }
+            } catch (error) {
+                showAlert('Error searching Spotify', 'danger');
+            }
+        }
+        
+        function displaySearchResults(playlists, title) {
+            const container = document.getElementById('searchResultsContainer');
+            const resultsDiv = document.getElementById('searchResults');
+            
+            container.innerHTML = '';
+            
+            if (playlists.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No playlists found for "${title}"</p>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+                return;
+            }
+            
+            // Filter out playlists with 0 followers, keep original order
+            playlists = playlists.filter(playlist => (playlist.followers || 0) > 0);
+            playlists = playlists.slice(0, 20);
+            
+            playlists.forEach((playlist, index) => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                
+                // Safely access playlist properties
+                const name = playlist.name || playlist.title || 'Unknown Playlist';
+                const creator = playlist.creator || playlist.owner || 'Unknown';
+                const tracks = playlist.tracks || playlist.track_count || 0;
+                const followers = playlist.followers || playlist.follower_count || 0;
+        
+                const image = playlist.image || playlist.images?.[0]?.url || 'https://via.placeholder.com/300x150?text=No+Image';
+                const description = playlist.description || '';
+                const keywords = playlist.keywords || [];
+                const position = index + 1; // Rank based on followers and growth
+                const country = playlist.country || '';
+                const keyword = playlist.keyword || '';
+                
+                // Determine ranking badge color based on followers
+                let rankingBadgeClass = 'bg-secondary';
+                if (followers >= 1000000) {
+                    rankingBadgeClass = 'bg-warning'; // Gold for 1M+ followers
+                } else if (followers >= 100000) {
+                    rankingBadgeClass = 'bg-success'; // Green for 100K+ followers
+                } else if (followers >= 10000) {
+                    rankingBadgeClass = 'bg-info'; // Blue for 10K+ followers
+                } else if (followers >= 1000) {
+                    rankingBadgeClass = 'bg-primary'; // Purple for 1K+ followers
+                }
+                
+                card.innerHTML = `
+                    <div class="playlist-card" data-playlist='${JSON.stringify(playlist)}'>
+                        <div class="position-badge ${rankingBadgeClass}">
+                            <span class="position-number">#${position}</span>
+                        </div>
+                        <img src="${image}" class="playlist-image" alt="${name}">
+                        <div class="p-3">
+                            <h6 class="mb-1">${name}</h6>
+                            <p class="text-muted mb-2">by ${creator}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-1">${tracks} tracks</span>
+                                ${followers > 0 ? `<span class="badge bg-info me-1">${formatFollowers(followers)} followers</span>` : ''}
+
+                                ${country ? `<span class="badge bg-warning me-1">${country}</span>` : ''}
+                            </div>
+                            ${keyword ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">Keyword: <span class="badge bg-light text-dark">${keyword}</span></small>
+                                </div>
+                            ` : ''}
+                            ${keywords && keywords.length > 0 ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">Keywords: ${keywords.slice(0, 3).map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('')}</small>
+                                </div>
+                            ` : ''}
+                            ${description ? `
+                                <div class="mb-2">
+                                    <small class="text-muted">${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                card.querySelector('.playlist-card').addEventListener('click', function() {
+                    togglePlaylistSelection(playlist, this);
+                });
+                
+                container.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            showAlert(`Found ${playlists.length} playlists for "${title}"`, 'success');
+        }
+        
+        // Keywords Tab Functions
+        async function loadCountriesForKeywords() {
+            try {
+                const response = await fetch('/rankings/countries', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.countries) {
+                    populateKeywordsCountrySelect(data.countries);
+                } else {
+                    console.error('Error loading countries for keywords:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading countries for keywords:', error);
+            }
+        }
+        
+        function populateKeywordsCountrySelect(countries) {
+            const select = document.getElementById('keywordsCountrySelect');
+            select.innerHTML = '<option value="">Select a country to view top keywords...</option>';
+            
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = country.name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadKeywordsForCountry(countryCode) {
+            setLoading('loadKeywordsBtn', true);
+            
+            try {
+                // Get all popular keywords and their rankings for this country
+                const popularKeywords = ['chill', 'deep house', 'lofi', 'workout', 'party', 'rock', 'pop', 'rap', 'jazz', 'electronic'];
+                const keywordsData = [];
+                
+                for (const keyword of popularKeywords) {
+                    try {
+                        // Use the rankings endpoint to get basic playlist info
+                        const response = await fetch(`/rankings/keyword/${encodeURIComponent(keyword)}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.rankings) {
+                            // Find playlists for this specific country
+                            const countryPlaylists = data.rankings.filter(playlist => playlist.country === countryCode);
+                            if (countryPlaylists.length > 0) {
+                                // Get the top playlist (lowest position number)
+                                const topPlaylist = countryPlaylists.reduce((top, current) => 
+                                    (current.position || 999) < (top.position || 999) ? current : top
+                                );
+                                
+                                keywordsData.push({
+                                    keyword: keyword,
+                                    playlists: [topPlaylist],
+                                    topPosition: topPlaylist.position || 1
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching keyword ${keyword}:`, error);
+                    }
+                }
+                
+                // Sort by position (lower position = higher rank) and display
+                keywordsData.sort((a, b) => (a.topPosition || 999) - (b.topPosition || 999));
+                displayKeywordsForCountry(keywordsData, countryCode);
+                
+            } catch (error) {
+                showAlert('Error loading keywords for country', 'danger');
+            } finally {
+                setLoading('loadKeywordsBtn', false);
+            }
+        }
+        
+        function displayKeywordsForCountry(keywordsData, countryCode) {
+            const container = document.getElementById('keywordsContainer');
+            const resultsDiv = document.getElementById('keywordsResults');
+            const countryNameSpan = document.getElementById('selectedCountryName');
+            
+            // Get country name
+            const countryName = document.getElementById('keywordsCountrySelect').options[
+                document.getElementById('keywordsCountrySelect').selectedIndex
+            ]?.text || countryCode;
+            
+            countryNameSpan.textContent = countryName;
+            container.innerHTML = '';
+            
+            if (keywordsData.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No keywords found for ${countryName}. Try another country or check back later.</p>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+                return;
+            }
+            
+            // Keywords are already sorted by position from the backend
+            
+            keywordsData.forEach((keywordData, index) => {
+                const topPlaylist = keywordData.playlists[0];
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                
+                // Determine ranking badge color based on position
+                const position = keywordData.topPosition || index + 1;
+                let rankingBadgeClass = 'bg-secondary';
+                if (position <= 3) {
+                    rankingBadgeClass = 'bg-warning'; // Gold for top 3
+                } else if (position <= 10) {
+                    rankingBadgeClass = 'bg-success'; // Green for top 10
+                } else if (position <= 20) {
+                    rankingBadgeClass = 'bg-info'; // Blue for top 20
+                } else if (position <= 50) {
+                    rankingBadgeClass = 'bg-primary'; // Purple for top 50
+                }
+                
+                card.innerHTML = `
+                    <div class="playlist-card">
+                        <div class="position-badge ${rankingBadgeClass}">
+                            <span class="position-number">#${index + 1}</span>
+                        </div>
+                        <img src="${topPlaylist.image || 'https://via.placeholder.com/300x150?text=' + keywordData.keyword}" 
+                             class="playlist-image" alt="${keywordData.keyword}">
+                        <div class="p-3">
+                            <h6 class="mb-1">${keywordData.keyword.toUpperCase()}</h6>
+                            <p class="text-muted mb-2">Top Playlist: ${topPlaylist.name}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-1">Position #${keywordData.topPosition}</span>
+                                <span class="badge bg-warning me-1">${countryCode}</span>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">${keywordData.playlists.length} playlists found • Ranked by position</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            showAlert(`Found ${keywordsData.length} top keywords for ${countryName}`, 'success');
+        }
+        
+        async function loadAllCountriesKeywords() {
+            try {
+                const response = await fetch('/rankings/countries', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.countries) {
+                    displayAllCountriesKeywords(data.countries);
+                } else {
+                    console.error('Error loading all countries keywords:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading all countries keywords:', error);
+            }
+        }
+        
+        function displayAllCountriesKeywords(countries) {
+            const container = document.getElementById('allCountriesContainer');
+            container.innerHTML = '';
+            
+            // Show first 12 countries as examples
+            const displayCountries = countries.slice(0, 12);
+            
+            displayCountries.forEach(country => {
+                const card = document.createElement('div');
+                card.className = 'col-md-3 col-lg-2';
+                
+                card.innerHTML = `
+                    <div class="playlist-card" style="cursor: pointer;" onclick="loadKeywordsForCountry('${country.code}')">
+                        <div class="p-3 text-center">
+                            <h6 class="mb-1">${country.name}</h6>
+                            <small class="text-muted">${country.code}</small>
+                            <div class="mt-2">
+                                <span class="badge bg-primary">Click to view keywords</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

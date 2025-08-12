@@ -51,6 +51,7 @@ Thumbs.db
 # Spotify cache
 .cache-*
 .spotify_cache
+.cache
 
 # Logs
 *.log

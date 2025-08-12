@@ -571,7 +571,13 @@ def login():
         client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
         redirect_uri = os.getenv('REDIRECT_URI')
         
+        # Debug: Print what we found
+        print(f"🔍 Found CLIENT_ID: {client_id is not None}")
+        print(f"🔍 Found CLIENT_SECRET: {client_secret is not None}")
+        print(f"🔍 Found REDIRECT_URI: {redirect_uri}")
+        
         if not all([client_id, client_secret, redirect_uri]):
+            print(f"❌ Missing credentials: client_id={bool(client_id)}, client_secret={bool(client_secret)}, redirect_uri={bool(redirect_uri)}")
             return jsonify({'error': 'Spotify credentials not configured'}), 500
         
         # Try to authenticate user

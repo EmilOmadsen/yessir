@@ -37,8 +37,8 @@ A Python application that allows you to search for any Spotify playlists and aut
 4. Fill in the app details:
    - **App name**: "Playlist Generator" (or any name you like)
    - **App description**: "A tool to generate mixed playlists"
-   - **Website**: `http://127.0.0.1:3000`
-   - **Redirect URI**: `http://127.0.0.1:3000/callback`
+   - **Website**: `http://127.0.0.1:8080`
+   - **Redirect URI**: `http://127.0.0.1:8080/callback`
 5. Click "Save"
 6. Copy your **Client ID** and **Client Secret**
 
@@ -49,8 +49,8 @@ A Python application that allows you to search for any Spotify playlists and aut
    ```
    SPOTIFY_CLIENT_ID=your_actual_client_id_here
    SPOTIFY_CLIENT_SECRET=your_actual_client_secret_here
-   REDIRECT_URI=http://127.0.0.1:3000/callback
-   PORT=3000
+   REDIRECT_URI=http://127.0.0.1:8080/callback
+   PORT=8080
    PUBLIC=false
    ```
 
@@ -71,7 +71,7 @@ python run_web.py
 ```
 
 This will:
-- Start a web server on port 3000
+- Start a web server on port 8080
 - Open your browser automatically
 - Provide a modern interface with search, selection, and generation features
 
@@ -153,8 +153,20 @@ Proceed with generation? (y/N): y
 ## Configuration Options
 
 - **PUBLIC**: Set to `true` to make generated playlists public, `false` for private
-- **PORT**: The port for the OAuth callback (default: 3000)
+- **PORT**: The port for the OAuth callback (default: 8080)
 - **REDIRECT_URI**: Must match what you set in Spotify Developer Dashboard
+
+## 🔄 Redirect URI Setup
+
+**Important**: Each user needs to set up their own Spotify API credentials and redirect URI.
+
+### For Local Development:
+- **Redirect URI**: `http://127.0.0.1:8080/callback`
+- **Port**: 8080 (configurable in .env file)
+
+### For Production Deployment:
+If you deploy this app to a live server (Heroku, Railway, etc.), update the redirect URI to your live domain:
+- **Example**: `https://your-app-name.herokuapp.com/callback`
 
 ## Troubleshooting
 

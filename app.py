@@ -28,6 +28,9 @@ if not os.getenv('REDIRECT_URI'):
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
 
+# RAILWAY DEPLOYMENT DEBUG - This should force a redeploy
+print("🚂 RAILWAY DEPLOYMENT: App starting with new code!")
+
 class SpotifyPlaylistGenerator:
     def __init__(self):
         self.sp = None

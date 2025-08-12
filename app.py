@@ -17,6 +17,14 @@ import requests
 # Load environment variables
 load_dotenv('.env')
 
+# For Railway deployment, also check for direct environment variables
+if not os.getenv('SPOTIFY_CLIENT_ID'):
+    print("⚠️  SPOTIFY_CLIENT_ID not found in environment")
+if not os.getenv('SPOTIFY_CLIENT_SECRET'):
+    print("⚠️  SPOTIFY_CLIENT_SECRET not found in environment")
+if not os.getenv('REDIRECT_URI'):
+    print("⚠️  REDIRECT_URI not found in environment")
+
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
 

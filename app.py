@@ -23,12 +23,19 @@ print(f"🔍 SPOTIFY_CLIENT_ID: {os.getenv('SPOTIFY_CLIENT_ID', 'NOT FOUND')}")
 print(f"🔍 SPOTIFY_CLIENT_SECRET: {os.getenv('SPOTIFY_CLIENT_SECRET', 'NOT FOUND')}")
 print(f"🔍 REDIRECT_URI: {os.getenv('REDIRECT_URI', 'NOT FOUND')}")
 
+# TEMPORARY FIX: Hardcode for Railway testing
 if not os.getenv('SPOTIFY_CLIENT_ID'):
     print("⚠️  SPOTIFY_CLIENT_ID not found in environment")
+    os.environ['SPOTIFY_CLIENT_ID'] = 'd7a59142072e4223a5e94195be60a1d5'
+    print("🔧 Set SPOTIFY_CLIENT_ID from hardcoded value")
 if not os.getenv('SPOTIFY_CLIENT_SECRET'):
     print("⚠️  SPOTIFY_CLIENT_SECRET not found in environment")
+    os.environ['SPOTIFY_CLIENT_SECRET'] = 'ef91d4916f9249f985d4bbd545473541'
+    print("🔧 Set SPOTIFY_CLIENT_SECRET from hardcoded value")
 if not os.getenv('REDIRECT_URI'):
     print("⚠️  REDIRECT_URI not found in environment")
+    os.environ['REDIRECT_URI'] = 'https://web-production-747b3.up.railway.app/callback'
+    print("🔧 Set REDIRECT_URI from hardcoded value")
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')

@@ -122,6 +122,7 @@ Search term: workout
 └─────┴─────────────────────────────────────┴────────────────────┴─────────┴────────┘
 
 Select playlists to add to your mix
+After selecting the playlists you want, go to the buttom of the page and press "go to generator"
 Enter playlist numbers separated by commas (e.g., 1,3,5)
 Or type 'search' to search again, or 'done' when finished
 Playlist numbers: 1,2
